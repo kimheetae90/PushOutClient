@@ -1,0 +1,222 @@
+fileFormatVersion: 2
+guid: 9cbbf8daae9773349b6faf69a684c110
+timeCreated: 1491311476
+licenseType: Store
+ModelImporter:
+  serializedVersion: 19
+  fileIDToRecycleName:
+    100000: //RootNode
+    100002: Pillar_Island_01
+    100004: Pillar_Island_02
+    100006: Pillar_Island_03
+    100008: Pillar_Island_04
+    100010: Pillar_Island_05
+    100012: Pillar_Island_06
+    100014: Pillar_Island_07
+    100016: Pillar_Island_08
+    100018: Pillar_Island_09
+    100020: Pillar_Island_10
+    100022: Pillar_Island_11
+    100024: Pillar_Island_12
+    100026: Pillar_Island_13
+    100028: Pillar_Island_14
+    100030: Pillar_Island_15
+    100032: Pillar_Island_16
+    100034: Pillar_Island_17
+    100036: Pillar_Island_18
+    100038: Pillar_Island_19
+    100040: Pillar_Island_20
+    100042: Pillar_Island_21
+    100044: Pillar_Island_22
+    100046: Pillar_Island_23
+    100048: Pillar_Island_24
+    100050: Pillar_Island_25
+    100052: Pillar_Island_26
+    100054: Pillar_Island_27
+    100056: Pillar_Island_28
+    100058: Pillar_Island_29
+    400000: //RootNode
+    400002: Pillar_Island_01
+    400004: Pillar_Island_02
+    400006: Pillar_Island_03
+    400008: Pillar_Island_04
+    400010: Pillar_Island_05
+    400012: Pillar_Island_06
+    400014: Pillar_Island_07
+    400016: Pillar_Island_08
+    400018: Pillar_Island_09
+    400020: Pillar_Island_10
+    400022: Pillar_Island_11
+    400024: Pillar_Island_12
+    400026: Pillar_Island_13
+    400028: Pillar_Island_14
+    400030: Pillar_Island_15
+    400032: Pillar_Island_16
+    400034: Pillar_Island_17
+    400036: Pillar_Island_18
+    400038: Pillar_Island_19
+    400040: Pillar_Island_20
+    400042: Pillar_Island_21
+    400044: Pillar_Island_22
+    400046: Pillar_Island_23
+    400048: Pillar_Island_24
+    400050: Pillar_Island_25
+    400052: Pillar_Island_26
+    400054: Pillar_Island_27
+    400056: Pillar_Island_28
+    400058: Pillar_Island_29
+    2300000: Pillar_Island_01
+    2300002: Pillar_Island_02
+    2300004: Pillar_Island_03
+    2300006: Pillar_Island_04
+    2300008: Pillar_Island_05
+    2300010: Pillar_Island_06
+    2300012: Pillar_Island_07
+    2300014: Pillar_Island_08
+    2300016: Pillar_Island_09
+    2300018: Pillar_Island_10
+    2300020: Pillar_Island_11
+    2300022: Pillar_Island_12
+    2300024: Pillar_Island_13
+    2300026: Pillar_Island_14
+    2300028: Pillar_Island_15
+    2300030: Pillar_Island_16
+    2300032: Pillar_Island_17
+    2300034: Pillar_Island_18
+    2300036: Pillar_Island_19
+    2300038: Pillar_Island_20
+    2300040: Pillar_Island_21
+    2300042: Pillar_Island_22
+    2300044: Pillar_Island_23
+    2300046: Pillar_Island_24
+    2300048: Pillar_Island_25
+    2300050: Pillar_Island_26
+    2300052: Pillar_Island_27
+    2300054: Pillar_Island_28
+    2300056: Pillar_Island_29
+    3300000: Pillar_Island_01
+    3300002: Pillar_Island_02
+    3300004: Pillar_Island_03
+    3300006: Pillar_Island_04
+    3300008: Pillar_Island_05
+    3300010: Pillar_Island_06
+    3300012: Pillar_Island_07
+    3300014: Pillar_Island_08
+    3300016: Pillar_Island_09
+    3300018: Pillar_Island_10
+    3300020: Pillar_Island_11
+    3300022: Pillar_Island_12
+    3300024: Pillar_Island_13
+    3300026: Pillar_Island_14
+    3300028: Pillar_Island_15
+    3300030: Pillar_Island_16
+    3300032: Pillar_Island_17
+    3300034: Pillar_Island_18
+    3300036: Pillar_Island_19
+    3300038: Pillar_Island_20
+    3300040: Pillar_Island_21
+    3300042: Pillar_Island_22
+    3300044: Pillar_Island_23
+    3300046: Pillar_Island_24
+    3300048: Pillar_Island_25
+    3300050: Pillar_Island_26
+    3300052: Pillar_Island_27
+    3300054: Pillar_Island_28
+    3300056: Pillar_Island_29
+    4300000: Pillar_Island_01
+    4300002: Pillar_Island_02
+    4300004: Pillar_Island_03
+    4300006: Pillar_Island_04
+    4300008: Pillar_Island_05
+    4300010: Pillar_Island_06
+    4300012: Pillar_Island_07
+    4300014: Pillar_Island_08
+    4300016: Pillar_Island_09
+    4300018: Pillar_Island_10
+    4300020: Pillar_Island_11
+    4300022: Pillar_Island_12
+    4300024: Pillar_Island_13
+    4300026: Pillar_Island_14
+    4300028: Pillar_Island_15
+    4300030: Pillar_Island_16
+    4300032: Pillar_Island_17
+    4300034: Pillar_Island_18
+    4300036: Pillar_Island_19
+    4300038: Pillar_Island_24
+    4300040: Pillar_Island_25
+    4300042: Pillar_Island_26
+    4300044: Pillar_Island_27
+    4300046: Pillar_Island_28
+    4300048: Pillar_Island_29
+    4300050: Pillar_Island_20
+    4300052: Pillar_Island_21
+    4300054: Pillar_Island_22
+    4300056: Pillar_Island_23
+  materials:
+    importMaterials: 0
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 2
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 0
+    swapUVChannels: 0
+    generateSecondaryUV: 1
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 0
+    normalImportMode: 1
+    tangentImportMode: 3
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 0
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
