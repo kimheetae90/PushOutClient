@@ -9,18 +9,18 @@ public class ADManager : MonoBehaviour, IUnityAdsListener
     public static ADManager Instance;
 
 #if UNITY_IOS
-   private string gameId = "3490322";
+   private string gameId = "3632994";
 #elif UNITY_ANDROID
-    private string gameId = "3490323";
+    private string gameId = "3632995";
 #else
-    private const string gameId = "3490323";
+    private const string gameId = "3632995";
 #endif
 
     public string BannerPlacementID = "banner";
     public string ScreenPlacementID = "screen";
     public string RewardPlacementID = "reward";
 
-    private bool testMode = true;
+    private bool testMode = false;
     public bool IsRunningRewardAD { get; private set; }
 
     Coroutine coroutin;
