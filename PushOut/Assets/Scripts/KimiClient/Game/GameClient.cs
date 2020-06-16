@@ -5,10 +5,10 @@ using UnityEngine;
 public abstract class GameClient : MonoBehaviour
 {
     public static GameClient Instance { get; protected set; }
-    
-    public GameMode Game { get; private set; }
 
-    public ControllerManager ControllerManager { get; private set; }
+    public UserInfo UserInfo;
+
+    public GameMode Game { get; private set; }
 
     protected virtual void Awake()
     {
@@ -18,8 +18,6 @@ public abstract class GameClient : MonoBehaviour
     private void Install()
     {
         Instance = this;
-        ControllerManager = new ControllerManager();
-        ControllerManager.Initiallize();
     }
     
     public void StartGame(GameMode game)

@@ -50,3 +50,4 @@ public class Entity
         charID = entity.charID;
     }
 }
+

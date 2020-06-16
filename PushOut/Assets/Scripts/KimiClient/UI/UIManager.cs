@@ -57,4 +57,14 @@ public class UIManager : MonoBehaviour
 
         ResourceLoader.Instance.Unload(key);
     }
+
+    public UIObject Get(string key)
+    {
+        if(uiDic.ContainsKey(key))
+        {
+            return uiDic[key];
+        }
+
+        return null;
+    }
 }

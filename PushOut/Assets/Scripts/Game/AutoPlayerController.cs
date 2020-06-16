@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AutoPlayerController : PlayerController
+public class AutoPlayerController
 {
     private Dictionary<string, Entity> entityDic;
     private Entity entity;
@@ -18,9 +18,12 @@ public class AutoPlayerController : PlayerController
 
     private bool bRevive = false;
 
+    public string UserID { get; private set; }
+
     public void CachePlayModeResource()
     {
         PlayMode playMode = GameClient.Instance.Game as PlayMode;
+        UserID = GameClient.Instance.UserInfo.UserID;
 
         if (playMode != null)
         {

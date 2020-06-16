@@ -11,26 +11,16 @@ public class TutorialMode : GameMode
     public GameObject Map { get; private set; }
 
     public Dictionary<string, Entity> EntitiesDic { get; private set; }
-    public Dictionary<string, NicknameHUD> CachedNicknameDic { get; private set; }
 
     public DummyServer server { get; private set; }
 
+    public BattleSystem BattleSystemComponent { get; private set; }
+
     public override void Dispose()
     {
-        CachedNicknameDic = null;
-
         NicknamePool.Clear();
         PushOutEffectPool.Clear();
         ActorPool.Clear();
-
-        foreach (var node in EntitiesDic)
-        {
-            Entity entity = node.Value;
-            if (!GameClient.Instance.ControllerManager.CurrentControllerID.Equals(entity.id))
-            {
-                GameClient.Instance.ControllerManager.Remove(entity.id);
-            }
-        }
 
         if (Map != null)
         {
@@ -53,22 +43,64 @@ public class TutorialMode : GameMode
         AddState("TutorialLoading", new TutorialLoadingState());
         AddState("Tutorial", new TutorialState());
 
-        GameClient.Instance.ControllerManager.Add("player", new PlayerController());
-        GameClient.Instance.ControllerManager.CurrentControllerID = "player";
-
         ActorPool = new ActorObjectPooler();
         PushOutEffectPool = new PushOutEffectPool();
         NicknamePool = new NicknameObjectPool();
         EntitiesDic = new Dictionary<string, Entity>();
-        CachedNicknameDic = new Dictionary<string, NicknameHUD>();
 
         GameObject serverGO = new GameObject();
         server = serverGO.AddComponent<DummyServer>();
+
+        BattleSystemComponent = new BattleSystem();
+        BattleSystemComponent.Initiallize(EntitiesDic);
 
         server.OnEnter += CreatePlayer;
         server.OnExit += RemovePlayer;
     }
 
+
+    public override void Update()
+    {
+        BattleSystemComponent.Update();
+
+        foreach (var node in EntitiesDic)
+        {
+            Entity entity = node.Value;
+            Actor actor = ActorPool.Find(entity.id);
+            if (actor == null)
+            {
+                continue;
+            }
+
+            if (entity.state == (int)EEntityState.Dead)
+            {
+                actor.Height -= Time.deltaTime * 5.0f;
+            }
+
+            actor.SetPosition(new UnityEngine.Vector3(entity.positionX, actor.Height, entity.positionY));
+
+            GameObject pushOutEffect = PushOutEffectPool.Find(entity.id);
+            if (entity.state == (int)EEntityState.Idle || entity.state == (int)EEntityState.Dead)
+            {
+                entity.clientPushOutTick = 0;
+                if (pushOutEffect.transform.localScale.magnitude > 1.0f)
+                {
+                    actor.ModelAnimator.SetTrigger("Attack");
+                }
+                pushOutEffect.transform.localScale = new UnityEngine.Vector3(0, 0, 0);
+            }
+            else if (entity.state == (int)EEntityState.Move)
+            {
+                entity.clientPushOutTick += Time.deltaTime;
+                float gauge = entity.clientPushOutTick;
+
+                if (gauge > PushOutForce.MAX_PUSHOUT_FORCE)
+                    gauge = PushOutForce.MAX_PUSHOUT_FORCE;
+
+                pushOutEffect.transform.localScale = new UnityEngine.Vector3(gauge * Actor.ScaleFactor * 2, 0.01f, gauge * Actor.ScaleFactor * 2);
+            }
+        }
+    }
 
     public void CreatePlayer(Entity inentity)
     {
@@ -84,42 +116,13 @@ public class TutorialMode : GameMode
             return ;
         }
 
-        bool isPlayerController = GameClient.Instance.ControllerManager.CurrentControllerID.Equals(id);
-        ControllerBase controller = null;
-        if (isPlayerController)
-        {
-            WeakReference<ControllerBase> controllerRef = null;
-            controllerRef = GameClient.Instance.ControllerManager.Get(id);
-            if (!controllerRef.TryGetTarget(out controller))
-            {
-                controller = new PlayerController();
-                GameClient.Instance.ControllerManager.Add(id, controller);
-            }
-        }
-        else
-        {
-            if (GameClient.Instance.ControllerManager.Contain(id))
-            {
-                Debug.LogError("[PlayMode]Already exist player id : " + id);
-                return ;
-            }
-
-            controller = new AIController();
-            GameClient.Instance.ControllerManager.Add(id, controller);
-        }
-
         EntitiesDic.Add(id, entity);
-
-        Actor actor = ActorPool.Get();
+        Actor actor = ActorPool.Get(id);
         actor.Initiallize("Devil/devil");
-        controller.Possess(actor);
-        controller.ReserveHeight(0);
-        controller.SetPosition(new Vector2(entity.positionX, entity.positionY));
-
-        NicknameHUD nicknameHUD = NicknamePool.Get();
+        
+        NicknameHUD nicknameHUD = NicknamePool.Get(id);
         nicknameHUD.SetNickname(entity.nickName);
         nicknameHUD.transform.SetParent(actor.transform);
-        CachedNicknameDic.Add(entity.id, nicknameHUD);
     }
 
     public void RemovePlayer(string playerID)
@@ -131,32 +134,16 @@ public class TutorialMode : GameMode
         }
 
         EntitiesDic.Remove(playerID);
-        WeakReference<ControllerBase> controllerPtr = GameClient.Instance.ControllerManager.Get(playerID);
-        ControllerBase controller = null;
-        if (!controllerPtr.TryGetTarget(out controller))
-        {
-            Debug.LogWarning("[PlayMode]Doesn't exist controller! id : " + playerID);
-            return;
-        }
-
-        WeakReference<Actor> actorPtr = controller.Manumit();
-        Actor actor = null;
-        if (!actorPtr.TryGetTarget(out actor))
+        Actor actor = ActorPool.Find(playerID);
+        if (actor == null)
         {
             Debug.LogWarning("[PlayMode]Doesn't exist actor! id : " + playerID);
             return;
         }
 
-        GameClient.Instance.ControllerManager.Remove(playerID);
-        controller.ReserveHeight(0);
+        actor.Height = 0;
         actor.Clear();
-        ActorPool.Return(actor);
-
-        NicknameHUD nicknameHUD = null;
-        if (CachedNicknameDic.TryGetValue(playerID, out nicknameHUD))
-        {
-            CachedNicknameDic.Remove(playerID);
-            NicknamePool.Return(nicknameHUD);
-        }
+        ActorPool.Return(playerID);
+        NicknamePool.Return(playerID);
     }
 }

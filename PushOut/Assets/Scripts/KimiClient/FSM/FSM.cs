@@ -34,6 +34,7 @@ public class FSM : MonoBehaviour
 
         for(int i = 0; i < fsmList.Count;i++)
         {
+            fsmList[i].Update();
             fsmList[i].CurrentState.Stay();
         }
     }

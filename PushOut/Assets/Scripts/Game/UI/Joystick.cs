@@ -23,6 +23,11 @@ public class Joystick : UIObject, IDragHandler, IPointerUpHandler, IPointerDownH
         }
     }
 
+    public void SetEnable(bool isEnable)
+    {
+        rootTransform.gameObject.SetActive(true);
+    }
+
     public void OnDrag(PointerEventData eventData)
     {
         inputVector = (eventData.position - pivotPos).normalized;

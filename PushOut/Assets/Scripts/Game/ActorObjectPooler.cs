@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ActorObjectPooler : ObjectPooler<Actor>
+public class ActorObjectPooler : ObjectPooler<string, Actor>
 {
     private GameObject prefab;
 

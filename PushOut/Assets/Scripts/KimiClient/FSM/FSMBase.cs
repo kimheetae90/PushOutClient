@@ -76,4 +76,6 @@ public abstract class FSMBase
 
         return state;
     }
+
+    public virtual void Update() {}
 }

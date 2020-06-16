@@ -69,12 +69,7 @@ public class LobbyState : FSMState
 
         LoginS2CPacket packet = JsonUtility.FromJson<LoginS2CPacket>(e.data);
 
-#if QAMode
-        GameClient.Instance.ControllerManager.Add(packet.id, new AutoPlayerController());
-#else
-        GameClient.Instance.ControllerManager.Add(packet.id, new PlayerController());
-#endif
-        GameClient.Instance.ControllerManager.CurrentControllerID = packet.id;
+        GameClient.Instance.UserInfo.UserID = packet.id;
 
         CheckVersionC2SPacket checkPacket = new CheckVersionC2SPacket();
         checkPacket.version = Application.version;

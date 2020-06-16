@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NicknameObjectPool : ObjectPooler<NicknameHUD>
+public class NicknameObjectPool : ObjectPooler<string, NicknameHUD>
 {
     private GameObject prefab;
     

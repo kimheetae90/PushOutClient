@@ -9,7 +9,6 @@ public class LobbyLoadingState : FSMState
     {
         LobbyMode lobbyMode = Base as LobbyMode;
         lobbyMode.versionCheck = false;
-        GameClient.Instance.ControllerManager.Reset();
 
         Server.Instance.Initiallize();
 

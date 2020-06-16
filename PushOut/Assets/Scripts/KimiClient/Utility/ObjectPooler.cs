@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
 using UnityEngine;
 
-public class ObjectPooler<Template> where Template : new()
+public class ObjectPooler<KeyType, Template> where Template : new()
 {
-    protected List<Template> usePool;
+    protected Dictionary<KeyType, Template> usePool;
     protected Queue<Template> unUsePool;
 
     public int Count { get { return usePool.Count + unUsePool.Count; } }
@@ -12,7 +13,7 @@ public class ObjectPooler<Template> where Template : new()
 
     public void Initiallize(int initSize = 0)
     {
-        usePool = new List<Template>();
+        usePool = new Dictionary<KeyType, Template>();
         unUsePool = new Queue<Template>();
 
         PreProcessInitiallize();
@@ -25,7 +26,7 @@ public class ObjectPooler<Template> where Template : new()
 
     protected virtual void PreProcessInitiallize() { }
 
-    public Template Get()
+    public Template Get(KeyType key)
     {
         if(unUsePool.Count == 0)
         {
@@ -34,7 +35,7 @@ public class ObjectPooler<Template> where Template : new()
 
         Template getObject = unUsePool.Dequeue();
         PostProcessGet(getObject);
-        usePool.Add(getObject);
+        usePool.Add(key, getObject);
 
         return getObject;
     }
@@ -47,50 +48,58 @@ public class ObjectPooler<Template> where Template : new()
         unUsePool.Enqueue(newObject);
     }
 
-    public void Add(Template newObject)
+    public void Return(KeyType key)
     {
-        if(!usePool.Contains(newObject))
+        if (!usePool.ContainsKey(key))
         {
             Debug.LogError("Pool doesn't contain New Object!");
             return;
         }
 
-        if(unUsePool.Contains(newObject))
-        {
-            Debug.LogError("Pool already contain New Object!");
-            return;
-        }
+        PreProcessReturn(usePool[key]);
 
-        unUsePool.Enqueue(newObject);
+        unUsePool.Enqueue(usePool[key]);
+        usePool.Remove(key);
     }
 
-    public void Return(Template returnObject)
+    public void Return(Template value)
     {
-        if (!usePool.Contains(returnObject))
+        if (!usePool.ContainsValue(value))
         {
             Debug.LogError("Pool doesn't contain New Object!");
             return;
         }
 
-        if (unUsePool.Contains(returnObject))
+        foreach(var node in usePool)
         {
-            Debug.LogError("Pool already contain New Object!");
-            return;
+            if(node.Value.Equals(value))
+            {
+                PreProcessReturn(value);
+
+                unUsePool.Enqueue(value);
+                usePool.Remove(node.Key);
+                break;
+            }
         }
-
-        PreProcessReturn(returnObject);
-
-        usePool.Remove(returnObject);
-        unUsePool.Enqueue(returnObject);
     }
 
     protected virtual void PreProcessReturn(Template returnObject) { }
+
+    public Template Find(KeyType key)
+    {
+        if(usePool.ContainsKey(key))
+        {
+            return usePool[key];
+        }
+
+        return default(Template);
+    }
 
     public void Each(System.Action<Template> func)
     {
         foreach(var node in usePool)
         {
-            func(node);
+            func(node.Value);
         }
     }
 
@@ -111,9 +120,9 @@ public class ObjectPooler<Template> where Template : new()
     public void Refresh(System.Action<Template> func = null)
     {
         int poolSize = usePool.Count;
-        for(int i=0;i<poolSize;i++)
+        foreach (var node in usePool)
         {
-            unUsePool.Enqueue(usePool[i]);
+            unUsePool.Enqueue(node.Value);
         }
 
         if(func != null)

@@ -24,14 +24,10 @@ public enum ETutorialSequenceStep
 public class TutorialState : FSMState
 {
     private TutorialMode cachedMode;
-    private Entity cachedPlayerEntity;
-    private ControllerBase cachedPlayerController;
     private Vector2 prevDirection;
 
     private Entity dummyEntity;
-    private ObjectPooler<PushOutForce> pushOutForcePool;
     private List<PushOutForce> reserveRemovePushOutForceList;
-    private Dictionary<string, GameObject> attachedPushOutEffect;
 
     private DummyServer server;
 
@@ -49,33 +45,8 @@ public class TutorialState : FSMState
         cachedMode.server.OnRetry += OnRetry;
 
         dummyEntity = new Entity();
-        pushOutForcePool = new ObjectPooler<PushOutForce>();
-        pushOutForcePool.Initiallize(100);
         reserveRemovePushOutForceList = new List<PushOutForce>();
-        attachedPushOutEffect = new Dictionary<string, GameObject>();
         
-        if (!cachedMode.EntitiesDic.TryGetValue(GameClient.Instance.ControllerManager.CurrentControllerID, out cachedPlayerEntity))
-        {
-            Debug.LogError("[PlayState]Player Entity doesn't exist!");
-            return;
-        }
-
-        WeakReference<ControllerBase> controllerRef = GameClient.Instance.ControllerManager.Get(GameClient.Instance.ControllerManager.CurrentControllerID);
-        if (controllerRef == null || !controllerRef.TryGetTarget(out cachedPlayerController))
-        {
-            Debug.LogError("[PlayState]Player Controller doesn't exist!");
-            return;
-        }
-
-        NicknameHUD hud = null;
-        if(cachedMode.CachedNicknameDic.TryGetValue(cachedPlayerEntity.id, out hud))
-        {
-            hud.rank.gameObject.SetActive(false);
-            hud.SetNickname("PushOut.io");
-        }
-
-        CachingPushOutEffect(cachedPlayerEntity);
-
         step = ETutorialSequenceStep.ShowStartDialog;
         tutorialSequence = GameClient.Instance.StartCoroutine(TutorialSequence());
     }
@@ -92,71 +63,31 @@ public class TutorialState : FSMState
         SetJoystick(false);
         UIManager.Instance.Unload("UI/Joystick");
         dummyEntity = null;
-        pushOutForcePool.Clear();
-        pushOutForcePool = null;
         reserveRemovePushOutForceList.Clear();
         reserveRemovePushOutForceList = null;
-        attachedPushOutEffect.Clear();
-        attachedPushOutEffect = null;
-        cachedPlayerEntity = null;
-        cachedPlayerController = null;
         GameClient.Instance.StopCoroutine(tutorialSequence); 
         cachedMode = null;
-
     }
 
     public override void Stay()
     {
-        Dictionary<string,Entity> entityDic = cachedMode.EntitiesDic;
-
-        foreach (var node in entityDic)
-        {
-            Entity entity = node.Value;
-            MoveEntity(entity);
-            SetPushOutEffect(entity);
-        }
-        
-        pushOutForcePool.Each((pushOutForce) =>
-        {
-            AddPushOutForce(pushOutForce);
-            
-            if(pushOutForce.force == 0)
-            {
-                reserveRemovePushOutForceList.Add(pushOutForce);
-            }
-        });
-
-        foreach(var node in reserveRemovePushOutForceList)
-        {
-            pushOutForcePool.Return(node);
-        }
-
-        reserveRemovePushOutForceList.Clear();
     }
 
     private void OnPushOut(List<PushOutForce> pushOutForceList)
     {
         foreach (var node in pushOutForceList)
         {
-            var pushOutForce = pushOutForcePool.Get();
-            pushOutForce.Copy(node);
-            pushOutForce.force *= 1000f;
+            PushOutForce newPushOut = new PushOutForce();
+            newPushOut.Copy(node);
+            newPushOut.force *= 1000f;
+            cachedMode.BattleSystemComponent.AddPushOutForce(newPushOut);
         }
     }
 
     private void OnDead(string deadID)
     {
-        WeakReference<ControllerBase> controllerRef = GameClient.Instance.ControllerManager.Get(deadID);
-        ControllerBase controller = null;
-        if (controllerRef == null || !controllerRef.TryGetTarget(out controller))
-        {
-            Debug.LogError("[PacketReceive]Controller doesn't exist! id : " + deadID);
-            return;
-        }
-
-        WeakReference<Actor> actorRef = controller.GetControlActor();
-        Actor actor = null;
-        if (actorRef == null || !actorRef.TryGetTarget(out actor))
+        Actor actor = cachedMode.ActorPool.Find(deadID);
+        if (actor == null)
         {
             Debug.LogError("[PacketReceive]Controller doesn't exist! id : " + deadID);
             return;
@@ -169,8 +100,8 @@ public class TutorialState : FSMState
             return;
         }
 
-        GameObject pushOutEffect = null;
-        if (attachedPushOutEffect.TryGetValue(deadID, out pushOutEffect))
+        GameObject pushOutEffect = cachedMode.PushOutEffectPool.Find(deadID);
+        if (pushOutEffect != null)
         {
             pushOutEffect.transform.localScale = Vector3.zero;
         }
@@ -182,7 +113,7 @@ public class TutorialState : FSMState
 
         actor.ModelAnimator.SetBool("Dead", true);
 
-        if (GameClient.Instance.ControllerManager.CurrentControllerID == deadID)
+        if (GameClient.Instance.UserInfo.UserID.Equals(deadID))
         {
             CameraHelper.Instance.Freeze();
             cachedMode.server.Retry("player", 0, 1.3f);
@@ -195,26 +126,15 @@ public class TutorialState : FSMState
         dummyEntity.Sync(inentity);
         Entity entity = SyncEntity(dummyEntity);
 
-        WeakReference<ControllerBase> controllerRef = GameClient.Instance.ControllerManager.Get(entity.id);
-        ControllerBase controller = null;
-        if (controllerRef == null || !controllerRef.TryGetTarget(out controller))
-        {
-            Debug.LogError("[PacketReceive]Controller doesn't exist! id : " + entity.id);
-            return;
-        }
-
-        WeakReference<Actor> actorRef = cachedPlayerController.GetControlActor();
-        Actor actor = null;
-        if (actorRef == null || !actorRef.TryGetTarget(out actor))
+        Actor actor = cachedMode.ActorPool.Find(dummyEntity.id);
+        if (actor == null)
         {
             Debug.LogError("[TUtorialState]Player Actor doesn't exist! Camera Setting Fail!");
             return;
         }
 
-        controller.ReserveHeight(0);
-
+        actor.Height = 0;
         SetJoystick(true);
-
         CameraHelper.Instance.Monitor(actor.transform);
     }
 
@@ -234,9 +154,8 @@ public class TutorialState : FSMState
         { 
             step = ETutorialSequenceStep.ShowMapAndPlayerDesc;
 
-            WeakReference<Actor> actorRef = cachedPlayerController.GetControlActor();
-            Actor actor = null;
-            if (actorRef == null || !actorRef.TryGetTarget(out actor))
+            Actor actor = cachedMode.ActorPool.Find("player");
+            if (actor == null)
             {
                 Debug.LogError("[PlayState]Player Actor doesn't exist! Camera Setting Fail!");
                 return;
@@ -244,6 +163,19 @@ public class TutorialState : FSMState
 
             CameraHelper.Instance.Monitor(actor.transform);
         });
+
+        Entity cachedPlayerEntity = null;
+        if (!cachedMode.EntitiesDic.TryGetValue("player", out cachedPlayerEntity))
+        {
+            Debug.LogError("[PlayState]Player Entity doesn't exist!");
+            yield return null;
+        }
+        GameObject attachedPushOutEffect = cachedMode.PushOutEffectPool.Find("player");
+        if (attachedPushOutEffect == null)
+        {
+            Debug.LogError("[PlayState]Player PushOutForceEffect doesn't exist!");
+            yield return null;
+        }
 
         while (step == ETutorialSequenceStep.ShowStartDialog) yield return null;
         yield return new WaitForSeconds(0.5f);
@@ -263,11 +195,7 @@ public class TutorialState : FSMState
         {
             step = ETutorialSequenceStep.Moving;
             SetJoystick(true);
-            GameObject pushOutForceGO = null;
-            if(attachedPushOutEffect.TryGetValue(cachedPlayerEntity.id, out pushOutForceGO))
-            {
-                pushOutForceGO.SetActive(false);
-            }
+            attachedPushOutEffect.SetActive(false);
         });
 
         while (step == ETutorialSequenceStep.ShowMoveDesc || step == ETutorialSequenceStep.Moving)
@@ -285,11 +213,7 @@ public class TutorialState : FSMState
         UIMessageBox.Instance.Show("움직이면 캐릭터를 둘러싸는 게이지가 생기고 점점 커집니다.", () =>
         {
             step = ETutorialSequenceStep.MoveToShowGauge;
-            GameObject pushOutForceGO = null;
-            if (attachedPushOutEffect.TryGetValue(cachedPlayerEntity.id, out pushOutForceGO))
-            {
-                pushOutForceGO.SetActive(true);
-            }
+            attachedPushOutEffect.SetActive(true);
             SetJoystick(true);
         });
 
@@ -306,14 +230,15 @@ public class TutorialState : FSMState
         SetJoystick(false);
         Entity aiEntity = null;
         float aiPosX = 0, aiPosY = 0;
-        cachedMode.server.Enter("ai", 0, 1.3f);
-        if (cachedMode.EntitiesDic.TryGetValue("ai", out aiEntity))
+        string aiID = "ai";
+        cachedMode.server.Enter(aiID, 0, 1.3f);
+        if (cachedMode.EntitiesDic.TryGetValue(aiID, out aiEntity))
         {
             aiPosX = aiEntity.positionX;
             aiPosY = aiEntity.positionY;
         }
-        NicknameHUD hud = null;
-        if (cachedMode.CachedNicknameDic.TryGetValue(aiEntity.id, out hud))
+        NicknameHUD hud = cachedMode.NicknamePool.Find(aiID);
+        if (hud != null)
         {
             hud.rank.gameObject.SetActive(false);
             hud.SetNickname("AI");
@@ -335,12 +260,12 @@ public class TutorialState : FSMState
 
         SetJoystick(false);
         yield return new WaitForSeconds(1.0f);
-        cachedMode.server.Exit("ai");
+        cachedMode.server.Exit(aiID);
 
-        cachedMode.server.Enter("ai", 0, 1.3f);
-        cachedMode.EntitiesDic.TryGetValue("ai", out aiEntity);
-        hud = null;
-        if (cachedMode.CachedNicknameDic.TryGetValue(aiEntity.id, out hud))
+        cachedMode.server.Enter(aiID, 0, 1.3f);
+        cachedMode.EntitiesDic.TryGetValue(aiID, out aiEntity);
+        hud = cachedMode.NicknamePool.Find(aiID);
+        if (hud == null)
         {
             hud.rank.gameObject.SetActive(false);
             hud.SetNickname("AI");
@@ -362,7 +287,7 @@ public class TutorialState : FSMState
 
         SetJoystick(false);
         yield return new WaitForSeconds(1.0f);
-        cachedMode.server.Exit("ai");
+        cachedMode.server.Exit(aiID);
         
         UIMessageBox.Instance.Show("이제 연습용 캐릭터가 움직입니다! 떨어뜨려서 튜토리얼을 완료하세요", () =>
         {
@@ -370,20 +295,17 @@ public class TutorialState : FSMState
             SetJoystick(true);
         });
 
-        cachedMode.server.Enter("ai", 1.2f, 0);
-        cachedMode.EntitiesDic.TryGetValue("ai", out aiEntity);
-        hud = null;
-        if (cachedMode.CachedNicknameDic.TryGetValue(aiEntity.id, out hud))
+        cachedMode.server.Enter(aiID, 1.2f, 0);
+        cachedMode.EntitiesDic.TryGetValue(aiID, out aiEntity);
+        hud = cachedMode.NicknamePool.Find(aiID);
+        if (hud != null)
         {
             hud.rank.gameObject.SetActive(false);
             hud.SetNickname("AI");
         }
 
-        ControllerBase controller = null;
-        GameClient.Instance.ControllerManager.Get("ai").TryGetTarget(out controller);
-        AIController aiController = controller as AIController;
-        aiController.CacheTutorialModeResource(cachedMode.server);
-        CachingPushOutEffect(aiEntity);
+        AIController aiController = new AIController();
+        aiController.CacheTutorialModeResource(aiID, cachedMode.server);
         while (step == ETutorialSequenceStep.ShowExercise || step == ETutorialSequenceStep.Exercise)
         {
             if(step == ETutorialSequenceStep.Exercise)
@@ -409,6 +331,12 @@ public class TutorialState : FSMState
 
     public void InputDirection(Vector2 direction)
     {
+        Entity cachedPlayerEntity = null;
+        if (!cachedMode.EntitiesDic.TryGetValue("player", out cachedPlayerEntity))
+        {
+            return;
+        }
+
         if (cachedPlayerEntity.state == (int)EEntityState.Dead)
         {
             return;
@@ -423,6 +351,12 @@ public class TutorialState : FSMState
 
     private void SendDirectionToServer(Vector2 direction)
     {
+        Entity cachedPlayerEntity = null;
+        if (!cachedMode.EntitiesDic.TryGetValue("player", out cachedPlayerEntity))
+        {
+            return;
+        }
+
         float total = Math.Abs(direction.x) + Math.Abs(direction.y);
         if (total == 0) total = 1;
 
@@ -430,125 +364,6 @@ public class TutorialState : FSMState
         float dirY = direction.y / total * 1000;
 
         cachedMode.server.Move(cachedPlayerEntity.id, dirX, dirY);
-    }
-
-
-    private void MoveEntity(Entity entity)
-    {
-        if (entity == null || entity.state == (int)EEntityState.Idle)
-            return;
-
-        WeakReference<ControllerBase> controllerRef = GameClient.Instance.ControllerManager.Get(entity.id);
-        ControllerBase controller = null;
-        if (controllerRef == null || !controllerRef.TryGetTarget(out controller))
-        {
-            Debug.LogError("[PlayState]Controller doesn't exist! id : " + entity.id);
-            return;
-        }
-
-        if (entity.state == (int)EEntityState.Dead)
-        {
-            WeakReference<Actor> actorRef = controller.GetControlActor();
-            Actor actor = null;
-            if (actorRef == null || !actorRef.TryGetTarget(out actor))
-            {
-                Debug.LogError("[PacketReceive]Controller doesn't exist! id : " + entity.id);
-                return;
-            }
-            controller.ReserveHeight(actor.Height - Time.deltaTime * 5f);
-        }
-
-        entity.positionX += entity.directionX * Time.deltaTime;
-        entity.positionY += entity.directionY * Time.deltaTime;
-
-        controller.SetPosition(new Vector2(entity.positionX, entity.positionY));
-    }
-
-
-    private void SetPushOutEffect(Entity entity)
-    {
-        if (entity == null)
-            return;
-
-        GameObject pushOutEffect = null;
-        if (!attachedPushOutEffect.TryGetValue(entity.id, out pushOutEffect))
-        {
-            return;
-        }
-
-        if (entity.state == (int)EEntityState.Idle || entity.state == (int)EEntityState.Dead)
-        {
-            entity.clientPushOutTick = 0;
-            if (pushOutEffect.transform.localScale.magnitude > 1.0f)
-            {
-                WeakReference<ControllerBase> controllerRef = GameClient.Instance.ControllerManager.Get(entity.id);
-                ControllerBase controller = null;
-                if (controllerRef == null || !controllerRef.TryGetTarget(out controller))
-                {
-                    Debug.LogError("[PacketReceive]Controller doesn't exist! id : " + entity.id);
-                    return;
-                }
-
-                WeakReference<Actor> actorRef = controller.GetControlActor();
-                Actor actor = null;
-                if (actorRef == null || !actorRef.TryGetTarget(out actor))
-                {
-                    Debug.LogError("[PacketReceive]Controller doesn't exist! id : " + entity.id);
-                    return;
-                }
-
-                actor.ModelAnimator.SetTrigger("Attack");
-            }
-            pushOutEffect.transform.localScale = new Vector3(0, 0, 0);
-            return;
-        }
-
-        if (entity.state == (int)EEntityState.Move)
-        {
-            entity.clientPushOutTick += Time.deltaTime;
-            float gauge = entity.clientPushOutTick;
-
-            if (gauge > PushOutForce.MAX_PUSHOUT_FORCE)
-                gauge = PushOutForce.MAX_PUSHOUT_FORCE;
-
-            pushOutEffect.transform.localScale = new Vector3(gauge * Actor.ScaleFactor * 2, 0.01f, gauge * Actor.ScaleFactor * 2);
-        }
-    }
-
-    private void AddPushOutForce(PushOutForce pushOutForce)
-    {
-        if (pushOutForce == null)
-        {
-            Debug.LogWarning("[PlayState]PushOutForce is Null!");
-            return;
-        }
-
-        Dictionary<string, Entity> entityDic = cachedMode.EntitiesDic;
-        Entity entity = null;
-        if (!entityDic.TryGetValue(pushOutForce.id, out entity))
-        {
-            return;
-        }
-
-        WeakReference<ControllerBase> controllerRef = GameClient.Instance.ControllerManager.Get(entity.id);
-        ControllerBase controller = null;
-        if (controllerRef == null || !controllerRef.TryGetTarget(out controller))
-        {
-            Debug.LogError("[PlayState]Controller doesn't exist! id : " + entity.id);
-            return;
-        }
-
-        float applyForce = pushOutForce.force - Convert.ToSingle((DateTime.Now - pushOutForce.createTime).TotalMilliseconds * 0.003);
-
-        entity.positionX += pushOutForce.directionX * applyForce * Time.deltaTime;
-        entity.positionY += pushOutForce.directionY * applyForce * Time.deltaTime;
-
-        controller.SetPosition(new Vector2(entity.positionX, entity.positionY));
-
-        if (applyForce < 0)
-        {
-            pushOutForce.force = 0;
-        }
     }
 
     public Entity SyncEntity(Entity dummyEntity)
@@ -567,27 +382,12 @@ public class TutorialState : FSMState
         EEntityState afterState = (EEntityState)dummyEntity.state;
 
         entity.Sync(this.dummyEntity);
-        WeakReference<ControllerBase> controllerRef = GameClient.Instance.ControllerManager.Get(id);
-        ControllerBase controller = null;
-        if (controllerRef == null || !controllerRef.TryGetTarget(out controller))
-        {
-            Debug.LogError("[PacketReceive]Controller doesn't exist! id : " + id);
-            return null;
-        }
 
-        controller.SetPosition(new Vector2(entity.positionX, entity.positionY));
-
+        Actor actor = cachedMode.ActorPool.Find(id);
+        actor.SetPosition(new Vector3(entity.positionX, actor.Height, entity.positionY));
         if (Math.Abs(entity.directionX) > float.Epsilon || Math.Abs(entity.directionY) > float.Epsilon)
         {
-            controller.SetRotate(new Vector2(entity.directionX, entity.directionY));
-        }
-
-        WeakReference<Actor> actorRef = controller.GetControlActor();
-        Actor actor = null;
-        if (actorRef == null || !actorRef.TryGetTarget(out actor))
-        {
-            Debug.LogError("[PacketReceive]Controller doesn't exist! id : " + id);
-            return null;
+            actor.SetRotate(new Vector2(entity.directionX, entity.directionY));
         }
 
         if (beforeState == EEntityState.Idle && afterState == EEntityState.Move)
@@ -604,35 +404,6 @@ public class TutorialState : FSMState
         }
 
         return entity;
-    }
-
-    private void CachingPushOutEffect(Entity entity)
-    {
-        if (entity == null)
-            return;
-
-        WeakReference<ControllerBase> controllerRef = GameClient.Instance.ControllerManager.Get(entity.id);
-        ControllerBase controller = null;
-        if (controllerRef == null || !controllerRef.TryGetTarget(out controller))
-        {
-            Debug.LogError("[PlayState]Controller doesn't exist! id : " + entity.id);
-            return;
-        }
-
-        WeakReference<Actor> actorRef = controller.GetControlActor();
-        Actor actor = null;
-        if (actorRef == null || !actorRef.TryGetTarget(out actor))
-        {
-            Debug.LogError("[PlayState]Actor doesn't exist! id : " + entity.id);
-            return;
-        }
-
-        GameObject pushOutEffect = cachedMode.PushOutEffectPool.Get();
-        pushOutEffect.transform.SetParent(actor.transform);
-        pushOutEffect.transform.localPosition = Vector3.zero;
-        pushOutEffect.transform.localScale = Vector3.zero;
-
-        attachedPushOutEffect.Add(entity.id, pushOutEffect);
     }
 
     private void SetJoystick(bool enable)

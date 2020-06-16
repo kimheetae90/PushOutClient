@@ -11,12 +11,19 @@ public class PushOutForce
     
     public static float MAX_PUSHOUT_FORCE = 1.0f;
     
+    public void Adjust()
+    {
+        directionX *= 0.001f;
+        directionY *= 0.001f;
+        force *= 0.001f;
+    }
+
     public void Copy(PushOutForce copy)
     {
-        directionX = copy.directionX * 0.001f;
-        directionY = copy.directionY * 0.001f;
+        directionX = copy.directionX;
+        directionY = copy.directionY;
         id = copy.id;
-        force = copy.force * 0.001f;
+        force = copy.force;
         createTime = DateTime.Now;
     }
 }

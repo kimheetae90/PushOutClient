@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AIController : ControllerBase
+public class AIController
 {
     private Dictionary<string, Entity> entityDic;
     private Entity entity;
@@ -22,9 +22,13 @@ public class AIController : ControllerBase
     private float initPosX = 0;
     private float initPosY = 0;
 
-    public void CachePlayModeResource(DummyServer server, float posX, float posY)
+    public string UserID { get; private set; }
+
+    public void CachePlayModeResource(string id, DummyServer server, float posX, float posY)
     {
         PlayMode playMode = GameClient.Instance.Game as PlayMode;
+
+        UserID = id;
 
         if (playMode != null)
         {
@@ -42,7 +46,7 @@ public class AIController : ControllerBase
         initPosY = posY;
     }
 
-    public void CacheTutorialModeResource(DummyServer server)
+    public void CacheTutorialModeResource(string id, DummyServer server)
     {
         TutorialMode tutorialMode = GameClient.Instance.Game as TutorialMode;
 

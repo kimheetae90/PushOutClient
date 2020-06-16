@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PushOutEffectPool : ObjectPooler<GameObject>
+public class PushOutEffectPool : ObjectPooler<string, GameObject>
 {
     private GameObject prefab;
 
