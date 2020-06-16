@@ -10,17 +10,19 @@ public class ADManager : MonoBehaviour, IUnityAdsListener
 
 #if UNITY_IOS
    private string gameId = "3632994";
+    private bool testMode = false;
 #elif UNITY_ANDROID
     private string gameId = "3632995";
+    private bool testMode = false;
 #else
     private const string gameId = "3632995";
+    private bool testMode = true;
 #endif
 
     public string BannerPlacementID = "banner";
     public string ScreenPlacementID = "screen";
     public string RewardPlacementID = "reward";
 
-    private bool testMode = false;
     public bool IsRunningRewardAD { get; private set; }
 
     Coroutine coroutin;
