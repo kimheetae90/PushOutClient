@@ -79,6 +79,11 @@ public class TutorialMode : GameMode
 
             actor.SetPosition(new UnityEngine.Vector3(entity.positionX, actor.Height, entity.positionY));
 
+            if (Math.Abs(entity.directionX) > float.Epsilon || Math.Abs(entity.directionY) > float.Epsilon)
+            {
+                actor.SetRotate(new UnityEngine.Vector3(entity.directionX, 0, entity.directionY));
+            }
+
             GameObject pushOutEffect = PushOutEffectPool.Find(entity.id);
             if (entity.state == (int)EEntityState.Idle || entity.state == (int)EEntityState.Dead)
             {
@@ -106,6 +111,7 @@ public class TutorialMode : GameMode
     {
         Entity entity = new Entity();
         entity.id = inentity.id;
+        entity.nickName = inentity.nickName;
         entity.Sync(inentity);
         entity.Adjust();
 
@@ -123,6 +129,11 @@ public class TutorialMode : GameMode
         NicknameHUD nicknameHUD = NicknamePool.Get(id);
         nicknameHUD.SetNickname(entity.nickName);
         nicknameHUD.transform.SetParent(actor.transform);
+
+        GameObject pushOutEffect = PushOutEffectPool.Get(id);
+        pushOutEffect.transform.SetParent(actor.transform);
+        pushOutEffect.transform.localPosition = UnityEngine.Vector3.zero;
+        pushOutEffect.transform.localScale = UnityEngine.Vector3.zero;
     }
 
     public void RemovePlayer(string playerID)
@@ -145,5 +156,6 @@ public class TutorialMode : GameMode
         actor.Clear();
         ActorPool.Return(playerID);
         NicknamePool.Return(playerID);
+        PushOutEffectPool.Return(playerID);
     }
 }

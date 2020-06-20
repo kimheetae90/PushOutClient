@@ -140,7 +140,7 @@ public class DummyServer : MonoBehaviour
     public void Enter(string id, float posX, float posY, bool useRes = true)
     {
         Entity entity = new Entity();
-        entity.state = 0;
+        entity.state = 0;        
         entity.id = id;
         entity.positionX = posX * 1000;
         entity.positionY = posY * 1000;

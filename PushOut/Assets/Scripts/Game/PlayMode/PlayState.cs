@@ -215,6 +215,9 @@ public class PlayState : FSMState
 
     private void UpdateLeaderBoard()
     {
+        if (cachedMode.AIMode)
+            return;
+
         SortEntityKillCount(cachedMode.EntitiesDic, ref orderedBySpawnTimeEntityList, ref deadEntityList);
 
         UILeaderBoard leaderBoard = UIManager.Instance.Load("UI/LeaderBoard") as UILeaderBoard;

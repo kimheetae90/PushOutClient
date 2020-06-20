@@ -9,6 +9,7 @@ public class NicknameHUD : MonoBehaviour
 
     public void SetNickname(string name)
     {
+        nickname.gameObject.SetActive(true);
         nickname.text = name;
     }
 

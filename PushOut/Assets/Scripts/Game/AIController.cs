@@ -50,6 +50,8 @@ public class AIController
     {
         TutorialMode tutorialMode = GameClient.Instance.Game as TutorialMode;
 
+        UserID = id;
+
         if (tutorialMode != null)
         {
             entityDic = tutorialMode.EntitiesDic;

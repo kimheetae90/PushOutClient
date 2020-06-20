@@ -112,8 +112,9 @@ public class TutorialState : FSMState
         entity.killCount = 0;
 
         actor.ModelAnimator.SetBool("Dead", true);
+        actor.ModelAnimator.SetBool("Move", false);
 
-        if (GameClient.Instance.UserInfo.UserID.Equals(deadID))
+        if (deadID.Equals("player"))
         {
             CameraHelper.Instance.Freeze();
             cachedMode.server.Retry("player", 0, 1.3f);
@@ -240,7 +241,7 @@ public class TutorialState : FSMState
         NicknameHUD hud = cachedMode.NicknamePool.Find(aiID);
         if (hud != null)
         {
-            hud.rank.gameObject.SetActive(false);
+            hud.SetRankTextActive(false);
             hud.SetNickname("AI");
         }
         UIMessageBox.Instance.Show("게이지 안에 캐릭터가 들어오면 밀려납니다. 연습용 캐릭터를 밀어내세요", () =>
@@ -265,9 +266,9 @@ public class TutorialState : FSMState
         cachedMode.server.Enter(aiID, 0, 1.3f);
         cachedMode.EntitiesDic.TryGetValue(aiID, out aiEntity);
         hud = cachedMode.NicknamePool.Find(aiID);
-        if (hud == null)
+        if (hud != null)
         {
-            hud.rank.gameObject.SetActive(false);
+            hud.SetRankTextActive(false);
             hud.SetNickname("AI");
         }
         UIMessageBox.Instance.Show("연습용 캐릭터를 밀어서 맵 아래로 떨어뜨리세요", () =>
@@ -300,7 +301,7 @@ public class TutorialState : FSMState
         hud = cachedMode.NicknamePool.Find(aiID);
         if (hud != null)
         {
-            hud.rank.gameObject.SetActive(false);
+            hud.SetRankTextActive(false);
             hud.SetNickname("AI");
         }
 
@@ -384,12 +385,7 @@ public class TutorialState : FSMState
         entity.Sync(this.dummyEntity);
 
         Actor actor = cachedMode.ActorPool.Find(id);
-        actor.SetPosition(new Vector3(entity.positionX, actor.Height, entity.positionY));
-        if (Math.Abs(entity.directionX) > float.Epsilon || Math.Abs(entity.directionY) > float.Epsilon)
-        {
-            actor.SetRotate(new Vector2(entity.directionX, entity.directionY));
-        }
-
+        
         if (beforeState == EEntityState.Idle && afterState == EEntityState.Move)
         {
             actor.ModelAnimator.SetBool("Move", true);

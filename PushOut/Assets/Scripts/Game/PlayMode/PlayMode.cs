@@ -141,6 +141,7 @@ public class PlayMode : GameMode
         UIManager.Instance.Unload("UI/ResultPopup");
         UIManager.Instance.Unload("UI/LeaderBoard");
         UIManager.Instance.Unload("UI/KillLog");
+        UIManager.Instance.Unload("UI/UIRoomNumber");
 
         ADManager.Instance.HideBanner();
     }
@@ -328,6 +329,7 @@ public class PlayMode : GameMode
         entity.killCount = 0;
 
         actor.ModelAnimator.SetBool("Dead", true);
+        actor.ModelAnimator.SetBool("Move", false);
 
         pushOutEffect.transform.localScale = UnityEngine.Vector3.zero;
     }
@@ -384,15 +386,28 @@ public class PlayMode : GameMode
         aiContextList.Add(new AIContext("AI3", 1.3f, 0));
         aiContextList.Add(new AIContext("AI4", -1.3f, 0));
 
+        NicknameHUD hud = null;
         foreach (AIContext context in aiContextList)
         {
             server.Enter(context.id, context.posX, context.posY);
+            hud = NicknamePool.Find(context.id);
+            if (hud != null)
+            {
+                hud.SetRankTextActive(false);
+                hud.SetNickname(context.id);
+            }
         }
 
         Entity entity = null;
         if (EntitiesDic.TryGetValue(GameClient.Instance.UserInfo.UserID, out entity))
         {
             server.Enter(entity.id, 0.4f, 1.1f, false);
+        }
+
+        hud = NicknamePool.Find(GameClient.Instance.UserInfo.UserID);
+        if (hud != null)
+        {
+            hud.SetRankTextActive(false);
         }
 
         BattleSystemComponent.Reset();
@@ -442,6 +457,13 @@ public class PlayMode : GameMode
         aiContextList = null;
 
         SetVisible(GameClient.Instance.UserInfo.UserID, false);
+
+
+        NicknameHUD hud = NicknamePool.Find(GameClient.Instance.UserInfo.UserID);
+        if (hud != null)
+        {
+            hud.SetRankTextActive(true);
+        }
 
         UIAIModePanel aiModePanel = UIManager.Instance.Load("UI/AIModePanel") as UIAIModePanel;
         aiModePanel.Hide();
@@ -533,6 +555,7 @@ public class PlayMode : GameMode
         }
 
         SetPlayer(entity);
+
         AIController aiController = new AIController();
         aiController.CachePlayModeResource(id, server, entity.positionX, entity.positionY);
         BattleSystemComponent.AddAIController(id, aiController);
@@ -644,9 +667,6 @@ public class PlayMode : GameMode
         string id = dummyEntity.id;
         if (!EntitiesDic.TryGetValue(id, out entity))
         {
-            Debug.LogError("[PacketReceive]Entity is Null! id : " + id);
-            UIMessageBox.Instance.Show("에러가 발생해 로비로 이동합니다");
-            Server.Instance.Disconnect();
             return null;
         }
 

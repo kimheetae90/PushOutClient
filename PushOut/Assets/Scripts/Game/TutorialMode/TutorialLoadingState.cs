@@ -16,6 +16,12 @@ public class TutorialLoadingState : FSMState
         ResourceLoader.Instance.Load("Devil/devil");
 
         cachedMode.server.Enter("player", 0.3f, 1.3f);
+        NicknameHUD hud = cachedMode.NicknamePool.Find("player");
+        if (hud != null)
+        {
+            hud.SetRankTextActive(false);
+            hud.SetNickname("나");
+        }
         Change("Tutorial");
     }
 
