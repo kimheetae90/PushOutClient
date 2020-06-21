@@ -9,10 +9,10 @@ public class ADManager : MonoBehaviour, IUnityAdsListener
     public static ADManager Instance;
 
 #if UNITY_IOS
-   private string gameId = "3632994";
+   private string gameId = "3632994";    
     private bool testMode = false;
 #elif UNITY_ANDROID
-    private string gameId = "3632995";
+    private string gameId = "3632995";    
     private bool testMode = false;
 #else
     private const string gameId = "3632995";
