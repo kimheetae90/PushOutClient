@@ -19,7 +19,7 @@ public class POGameClient : GameClient
 #if ServerMonitor
         StartGame(new ServerMonitorServerConnectMode());
 #else
-#if !QAMode
+#if !DUMMY_CLIENT
         int tutorial = PlayerPrefs.GetInt("Tutorial", 0);
         if(tutorial == 0)
         {

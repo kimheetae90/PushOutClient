@@ -104,9 +104,6 @@ public class PlayMode : GameMode
         {
             ADManager.Instance.ShowBanner();
         }
-
-        UIRoomNumber uiRoomNumber = UIManager.Instance.Load("UI/UIRoomNumber") as UIRoomNumber;
-        uiRoomNumber.SetRoomNumber(RoomNumber);
     }
 
     public override void Dispose()
@@ -368,6 +365,10 @@ public class PlayMode : GameMode
 
     public void StartAIMode()
     {
+#if DUMMY_CLIENT
+        return;
+#endif
+
         GameObject serverGO = new GameObject();
         server = serverGO.AddComponent<DummyServer>();
 
@@ -430,6 +431,10 @@ public class PlayMode : GameMode
 
     public void StopAIMode()
     {
+#if DUMMY_CLIENT
+        return;
+#endif
+
         foreach (AIContext context in aiContextList)
         {
             server.Exit(context.id);

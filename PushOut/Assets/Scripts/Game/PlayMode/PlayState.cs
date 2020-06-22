@@ -34,6 +34,10 @@ public class PlayState : FSMState
     private List<Entity> orderedBySpawnTimeEntityList;
     private List<Entity> deadEntityList;
 
+#if DUMMY_CLIENT
+    private AutoPlay autoPlay;
+#endif
+
     public override void Enter()
     {
         cachedMode = Base as PlayMode;
@@ -69,10 +73,18 @@ public class PlayState : FSMState
         {
             cachedMode.StartAIMode();
         }
+
+#if DUMMY_CLIENT
+        autoPlay = new AutoPlay();
+        autoPlay.Initiallize(cachedMode.EntitiesDic, cachedMode.EntitiesDic[GameClient.Instance.UserInfo.UserID]);
+#endif
     }
 
     public override void Stay()
     {
+#if DUMMY_CLIENT
+        autoPlay.Compute();
+#endif
         UpdateLeaderBoard();
     }
     

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AIController
+public class AutoPlay : MonoBehaviour
 {
     private Dictionary<string, Entity> entityDic;
     private Entity entity;
@@ -16,50 +16,12 @@ public class AIController
 
     private bool bRevive = false;
 
-    private DummyServer server;
-    private float initPosX = 0;
-    private float initPosY = 0;
+    // Start is called before the first frame update
 
-    public string UserID { get; private set; }
-
-    public void CachePlayModeResource(string id, DummyServer server, float posX, float posY)
+    public void Initiallize(Dictionary<string, Entity> inEntityDic, Entity autoPlayEntity)
     {
-        PlayMode playMode = GameClient.Instance.Game as PlayMode;
-
-        UserID = id;
-
-        if (playMode != null)
-        {
-            entityDic = playMode.EntitiesDic;
-        }
-
-        if (entityDic != null)
-        {
-            entityDic.TryGetValue(UserID, out entity);
-        }
-
-        this.server = server;
-        initPosX = posX;
-        initPosY = posY;
-    }
-
-    public void CacheTutorialModeResource(string id, DummyServer server)
-    {
-        TutorialMode tutorialMode = GameClient.Instance.Game as TutorialMode;
-
-        UserID = id;
-
-        if (tutorialMode != null)
-        {
-            entityDic = tutorialMode.EntitiesDic;
-        }
-
-        if (entityDic != null)
-        {
-            entityDic.TryGetValue(UserID, out entity);
-        }
-
-        this.server = server;
+        entityDic = inEntityDic;
+        entity = autoPlayEntity;
     }
 
     public void Compute()
@@ -67,12 +29,12 @@ public class AIController
         checkTimeDel += Time.deltaTime;
         if (checkTimeDel < checkTime)
             return;
-        
+
         if (entity.state == 2)
         {
             if (bRevive)
             {
-                server.Retry(entity.id, initPosX, initPosY);
+                Server.Instance.Emit("RetryC2S");
                 bRevive = false;
             }
             else
@@ -136,9 +98,9 @@ public class AIController
             if (diff > PushOutForce.MAX_PUSHOUT_FORCE * 0.5f)
             {
                 float rand = UnityEngine.Random.Range(0.1f, 0.3f);
-                if(rand > 0.2f)
+                if (rand > 0.2f)
                 {
-                    Shot();   
+                    Shot();
                 }
                 else
                 {
@@ -158,10 +120,10 @@ public class AIController
             {
                 Shot();
             }
-            else if(diff > PushOutForce.MAX_PUSHOUT_FORCE * 0.4f)
+            else if (diff > PushOutForce.MAX_PUSHOUT_FORCE * 0.4f)
             {
                 float rand = UnityEngine.Random.Range(0.1f, 0.8f);
-                if(rand > 0.4f)
+                if (rand > 0.4f)
                 {
                     Shot();
                 }
@@ -188,7 +150,7 @@ public class AIController
         foreach (var node in entityDic)
         {
             Entity iterEntity = node.Value;
-            if (iterEntity.id == UserID)
+            if (iterEntity.id == entity.id)
                 continue;
 
             if (iterEntity.state == 2)
@@ -223,12 +185,17 @@ public class AIController
         float dirX = finalDir.x / total * 1000;
         float dirY = finalDir.y / total * 1000;
 
-        server.Move(entity.id, dirX, dirY);
-
+        PlayerChangeMovementC2SPakcet packet = new PlayerChangeMovementC2SPakcet();
+        packet.directionX = dirX;
+        packet.directionY = dirY;
+        Server.Instance.Emit("PlayerChangeMovementC2S", JsonUtility.ToJson(packet));
     }
 
     private void Shot()
     {
-        server.Move(entity.id, 0, 0);
+        PlayerChangeMovementC2SPakcet packet = new PlayerChangeMovementC2SPakcet();
+        packet.directionX = 0;
+        packet.directionY = 0;
+        Server.Instance.Emit("PlayerChangeMovementC2S", JsonUtility.ToJson(packet));
     }
 }

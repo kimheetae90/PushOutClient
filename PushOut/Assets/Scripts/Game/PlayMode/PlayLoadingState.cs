@@ -47,6 +47,9 @@ public class PlayLoadingState : FSMState
         int.TryParse(roomNum, out roomNumber);
         cachedMode.RoomNumber = roomNumber;
 
+        UIRoomNumber uiRoomNumber = UIManager.Instance.Load("UI/UIRoomNumber") as UIRoomNumber;
+        uiRoomNumber.SetRoomNumber(roomNumber);
+
         int index = 0;
         foreach (var member in memberInfo)
         {
