@@ -19,6 +19,11 @@ public class UIMessageBox : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+    }
+
+    private void Start()
+    {
+        this.gameObject.AddComponent<AndroidBackButtonListener>();
         gameObject.SetActive(false);
         gameObject.transform.localScale = new Vector3(1, 1, 1);
     }
@@ -26,8 +31,8 @@ public class UIMessageBox : MonoBehaviour
     public void Show(string text, Action ok, Action cancel)
     {
         transform.SetAsLastSibling();
-        AndroidBackButtonListener androidBackButtonListner = this.gameObject.AddComponent<AndroidBackButtonListener>();
-        androidBackButtonListner.SetAction(OnClickCancel);
+        AndroidBackButtonListener androidBackButtonListner = this.gameObject.GetComponent<AndroidBackButtonListener>();
+        androidBackButtonListner.SetAction(OnBackButtonCancel);
         gameObject.SetActive(true);
         OkButton.SetActive(true);
         CancelButton.SetActive(true);
@@ -41,8 +46,8 @@ public class UIMessageBox : MonoBehaviour
     public void Show(string text, Action close = null)
     {
         transform.SetAsLastSibling();
-        AndroidBackButtonListener androidBackButtonListner = this.gameObject.AddComponent<AndroidBackButtonListener>();
-        androidBackButtonListner.SetAction(OnClickClose);
+        AndroidBackButtonListener androidBackButtonListner = this.gameObject.GetComponent<AndroidBackButtonListener>();
+        androidBackButtonListner.SetAction(OnBackButtonClose);
         gameObject.SetActive(true);
         OkButton.SetActive(false);
         CancelButton.SetActive(false);
@@ -61,6 +66,26 @@ public class UIMessageBox : MonoBehaviour
             okAction();
 
         gameObject.SetActive(false);
+    }
+
+    public bool OnBackButtonCancel()
+    {
+        if (!gameObject.activeSelf)
+            return false;
+
+        OnClickCancel();
+
+        return true;
+    }
+
+    public bool OnBackButtonClose()
+    {
+        if (!gameObject.activeSelf)
+            return false;
+
+        OnClickClose();
+
+        return true;
     }
 
     public void OnClickCancel()

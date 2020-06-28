@@ -12,6 +12,7 @@ public class LobbyLoadingState : FSMState
 
         Server.Instance.Initiallize();
 
+        ResourceLoader.Instance.Load("UI/Lobby");
         UILobby lobby = UIManager.Instance.Load("UI/Lobby") as UILobby;
         lobbyMode.LobbyUI = new WeakReference<UILobby>(lobby);        
         lobby.Show();

@@ -4,12 +4,16 @@ using UnityEngine;
 
 public class AndroidBackButtonListener : MonoBehaviour
 {
-    private Action action;
+    private Func<bool> action;
 
     public void OnEnable()
     {
         Regist();
+    }
 
+    public void OnDisable()
+    {
+        Remove();
     }
 
     public void Regist()
@@ -17,14 +21,23 @@ public class AndroidBackButtonListener : MonoBehaviour
         AndroidBackButtonManager.Instance.Regist(this);
     }
 
-    public void SetAction(Action inAction)
+    public void Remove()
+    {
+        AndroidBackButtonManager.Instance.Remove(this);
+    }
+
+    public void SetAction(Func<bool> inAction)
     {
         action = inAction;
     }
 
-    public void OnAndroidBackButton()
+    public bool OnAndroidBackButton()
     {
         if(action != null)
-            action();
+        {
+            return action();
+        }
+
+        return true;
     }
 }

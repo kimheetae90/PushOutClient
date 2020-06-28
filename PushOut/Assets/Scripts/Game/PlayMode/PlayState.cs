@@ -99,6 +99,7 @@ public class PlayState : FSMState
         Server.Instance.Off("RetryKeepKillCountS2C", ReceiveRetry);
 
         InputHelper.Instance.DirectionDelegate -= InputDirection;
+        InputHelper.Instance.DirectionDelegate = null;
 
         dummyEntity = null;
         orderedBySpawnTimeEntityList = null;

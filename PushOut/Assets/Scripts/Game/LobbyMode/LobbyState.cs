@@ -76,12 +76,6 @@ public class LobbyState : FSMState
         Server.Instance.Emit("CheckVersionC2S", JsonUtility.ToJson(checkPacket));
     }
 
-    private void ChangePlayMode()
-    {
-        ChangeNickName();
-        GameClient.Instance.StartGame(new PlayMode());
-    }
-
     private void ReceiveCheckVersion(SocketIOEvent e)
     {
         Debug.Log("[PacketReceive]LobbyLoadingState Connection Success received: " + e.name + " " + e.data);

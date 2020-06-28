@@ -7,6 +7,7 @@ using UnitySocketIO.Events;
 public class RoomInfoPacket
 {
     public int roomNum;
+    public int password;
     public List<Entity> memberInfo;
     public List<string> nickname;
 }
@@ -23,8 +24,6 @@ public class PlayLoadingState : FSMState
         cachedMode.ActorPool.Initiallize(10);
         cachedMode.PushOutEffectPool.Initiallize(10);
         cachedMode.NicknamePool.Initiallize(10);
-
-        ResourceLoader.Instance.Load("UI/ResultPopup");
     }
 
     private void ReceiveRoomInfo(SocketIOEvent e)
@@ -38,17 +37,14 @@ public class PlayLoadingState : FSMState
         }
 
         RoomInfoPacket roomInfo = JsonUtility.FromJson<RoomInfoPacket>(e.data);
-        
-        string roomNum = roomInfo.roomNum.ToString();
+
+        cachedMode.RoomNumber = roomInfo.roomNum;
+        cachedMode.Password = roomInfo.password;
         var memberInfo = roomInfo.memberInfo;
         var nickname = roomInfo.nickname;
 
-        int roomNumber;
-        int.TryParse(roomNum, out roomNumber);
-        cachedMode.RoomNumber = roomNumber;
-
         UIRoomNumber uiRoomNumber = UIManager.Instance.Load("UI/UIRoomNumber") as UIRoomNumber;
-        uiRoomNumber.SetRoomNumber(roomNumber);
+        uiRoomNumber.SetRoomNumber(cachedMode.RoomNumber, cachedMode.Password);
 
         int index = 0;
         foreach (var member in memberInfo)

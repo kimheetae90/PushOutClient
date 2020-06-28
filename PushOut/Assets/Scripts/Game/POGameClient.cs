@@ -5,8 +5,6 @@ using UnityEngine;
 
 public class POGameClient : GameClient
 {
-    private AndroidBackButtonListener androidBackButtonListner;
-
     protected override void Awake()
     {
         base.Awake();
@@ -31,20 +29,7 @@ public class POGameClient : GameClient
             StartGame(new LobbyMode());
         }
 #endif
-        androidBackButtonListner = gameObject.AddComponent<AndroidBackButtonListener>();
-        androidBackButtonListner.SetAction(OnQuit);
-
+      
         ResourceLoader.Instance.Load("UI/MessageBox");
-    }
-
-    private void OnQuit()
-    {
-        UIMessageBox.Instance.Show("그만할라구요?", () => {
-            Server.Instance.Disconnect();
-            Application.Quit();
-        },
-        () => {
-            androidBackButtonListner.Regist();
-        });
     }
 }

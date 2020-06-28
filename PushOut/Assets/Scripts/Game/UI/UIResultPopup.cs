@@ -9,7 +9,7 @@ public class UIResultPopup : UIObject
 
     private void Awake()
     {
-        androidBackButtonListner.SetAction(OnExitButton);
+        androidBackButtonListner.SetAction(OnBackButtonExit);
     }
 
     public void SetLeaderBoard(List<Entity> orderedBySpawnTimeEntityList)
@@ -34,6 +34,15 @@ public class UIResultPopup : UIObject
     public void OnRetryButton()
     {
         Server.Instance.Emit("RetryC2S");
+    }
+
+    public bool OnBackButtonExit()
+    {
+        if (!this.gameObject.activeSelf)
+            return false;
+
+        OnExitButton();
+        return true;
     }
 
     public void OnExitButton()

@@ -61,6 +61,7 @@ public class TutorialState : FSMState
             cachedMode.server.OnRetry -= OnRetry;
         }
         SetJoystick(false);
+        InputHelper.Instance.DirectionDelegate = null;
         UIManager.Instance.Unload("UI/Joystick");
         dummyEntity = null;
         reserveRemovePushOutForceList.Clear();

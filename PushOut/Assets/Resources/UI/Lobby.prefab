@@ -1339,7 +1339,6 @@ GameObject:
   - component: {fileID: 3059009631190480720}
   - component: {fileID: 3059009631190480723}
   - component: {fileID: 4122578619295056598}
-  - component: {fileID: 458245395709760527}
   m_Layer: 5
   m_Name: Lobby
   m_TagString: Untagged
@@ -1422,23 +1421,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   androidBackButtonListner: {fileID: 0}
-  screenAD: {fileID: 458245395709760527}
+  VisitStackToShowScreenAD: 4
   CreatePanel: {fileID: 3724148063007110177}
   JoinPanel: {fileID: 1704478123055348813}
---- !u!114 &458245395709760527
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3059009631190480725}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 68e5f6c2f7aaf3c4e844457841651836, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowCount: 5
-  placementId: screen
 --- !u!1 &3059009631305195972
 GameObject:
   m_ObjectHideFlags: 0

@@ -47,6 +47,7 @@ public class RetryS2CPacket
 public class PlayMode : GameMode
 {
     public int RoomNumber { get; set; }
+    public int Password { get; set; }
 
     public ActorObjectPooler ActorPool { get; private set; }
     public PushOutEffectPool PushOutEffectPool { get; private set; }
@@ -95,15 +96,14 @@ public class PlayMode : GameMode
         Server.Instance.On("RetryKeepKillCountS2C", ReceiveRetry);
         Server.Instance.On("ExitRoomS2C", ReceiveExitRoom);
 
-        if (GameFlag != EGameButtonFlag.PublicJoin)
-        {
-            Action EnableBannerActive = () => { ADManager.Instance.ShowBanner(); };
-            ADManager.Instance.ShowReward(EnableBannerActive, EnableBannerActive, EnableBannerActive);
-        }
-        else
-        {
-            ADManager.Instance.ShowBanner();
-        }
+        ResourceLoader.Instance.Load("UI/AIModePanel");
+        ResourceLoader.Instance.Load("UI/Joystick");
+        ResourceLoader.Instance.Load("UI/ResultPopup");
+        ResourceLoader.Instance.Load("UI/LeaderBoard");
+        ResourceLoader.Instance.Load("UI/KillLog");
+        ResourceLoader.Instance.Load("UI/UIRoomNumber");
+
+        ADManager.Instance.ShowBanner();
     }
 
     public override void Dispose()
